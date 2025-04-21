@@ -1,4 +1,4 @@
-import { Html, Body, Head, Heading, Hr, Container, Preview, Section, Text, Img } from "@react-email/components"
+import { Html, Body, Container, Section, Hr, Text, Heading, Img } from "@react-email/components"
 
 interface JobCardEmailProps {
   data: any
@@ -7,159 +7,101 @@ interface JobCardEmailProps {
 export default function JobCardEmail({ data }: JobCardEmailProps) {
   return (
     <Html>
-      <Head />
-      <Preview>
-        Job Card: {data.clientCompany} - {data.machineName}
-      </Preview>
-      <Body style={main}>
-        <Container style={container}>
-          <Heading style={h1}>Job Card Report</Heading>
+      <Body style={{ fontFamily: "Arial, sans-serif", margin: "0", padding: "0" }}>
+        <Container style={{ maxWidth: "600px", margin: "0 auto", padding: "20px", border: "1px solid #e5e7eb" }}>
+          <Heading style={{ textAlign: "center", color: "#111827" }}>Job Card Report</Heading>
 
-          <Section style={section}>
-            <Heading style={h2}>Engineer Details</Heading>
-            <Text style={text}>Name: {data.engineerName}</Text>
-            <Text style={text}>ID: {data.engineerId}</Text>
-            <Text style={text}>Phone: {data.engineerPhone}</Text>
+          <Section style={{ marginBottom: "20px", padding: "15px", backgroundColor: "#f9fafb", borderRadius: "5px" }}>
+            <Heading as="h2" style={{ fontSize: "18px", marginBottom: "10px", color: "#4b5563" }}>
+              Engineer Details
+            </Heading>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Name: {data.engineerName}</Text>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>ID: {data.engineerId}</Text>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Phone: {data.engineerPhone}</Text>
           </Section>
 
-          <Hr style={hr} />
-
-          <Section style={section}>
-            <Heading style={h2}>Client Details</Heading>
-            <Text style={text}>Contact Person: {data.clientName}</Text>
-            <Text style={text}>Company/Institution: {data.clientCompany}</Text>
-            <Text style={text}>Phone: {data.clientPhone}</Text>
-            <Text style={text}>Email: {data.clientEmail}</Text>
+          <Section style={{ marginBottom: "20px", padding: "15px", backgroundColor: "#f9fafb", borderRadius: "5px" }}>
+            <Heading as="h2" style={{ fontSize: "18px", marginBottom: "10px", color: "#4b5563" }}>
+              Client Details
+            </Heading>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Contact Person: {data.clientName}</Text>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Company/Institution: {data.clientCompany}</Text>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Phone: {data.clientPhone}</Text>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Email: {data.clientEmail}</Text>
           </Section>
 
-          <Hr style={hr} />
-
-          <Section style={section}>
-            <Heading style={h2}>Machine Details</Heading>
-            <Text style={text}>Machine Name: {data.machineName}</Text>
-            <Text style={text}>Serial Number: {data.machineSerialNumber}</Text>
-            {data.machineModel && <Text style={text}>Model: {data.machineModel}</Text>}
+          <Section style={{ marginBottom: "20px", padding: "15px", backgroundColor: "#f9fafb", borderRadius: "5px" }}>
+            <Heading as="h2" style={{ fontSize: "18px", marginBottom: "10px", color: "#4b5563" }}>
+              Machine Details
+            </Heading>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Machine Name: {data.machineName}</Text>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Model: {data.machineModel || "N/A"}</Text>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Serial Number: {data.machineSerialNumber}</Text>
           </Section>
 
-          <Hr style={hr} />
-
-          <Section style={section}>
-            <Heading style={h2}>Fault Details</Heading>
-            <Text style={text}>Date Reported: {data.reportedDate}</Text>
-            <Text style={text}>Description: {data.faultDescription}</Text>
+          <Section style={{ marginBottom: "20px", padding: "15px", backgroundColor: "#f9fafb", borderRadius: "5px" }}>
+            <Heading as="h2" style={{ fontSize: "18px", marginBottom: "10px", color: "#4b5563" }}>
+              Fault Details
+            </Heading>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Reported Date: {data.reportedDate}</Text>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Description: {data.faultDescription}</Text>
           </Section>
 
-          <Hr style={hr} />
-
-          <Section style={section}>
-            <Heading style={h2}>Resolution</Heading>
-            <Text style={text}>Status: {data.resolutionStatus}</Text>
-            <Text style={text}>Details: {data.resolutionDetails}</Text>
-            {data.partsReplaced && <Text style={text}>Parts Replaced: {data.partsReplaced}</Text>}
+          <Section style={{ marginBottom: "20px", padding: "15px", backgroundColor: "#f9fafb", borderRadius: "5px" }}>
+            <Heading as="h2" style={{ fontSize: "18px", marginBottom: "10px", color: "#4b5563" }}>
+              Final Result
+            </Heading>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Status: {data.resolutionStatus}</Text>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>Details: {data.resolutionDetails}</Text>
+            {data.partsReplaced && (
+              <Text style={{ margin: "5px 0", color: "#374151" }}>Parts Replaced: {data.partsReplaced}</Text>
+            )}
           </Section>
 
-          <Hr style={hr} />
-
-          <Section style={section}>
-            <Heading style={h2}>Recommendations</Heading>
-            <Text style={text}>{data.recommendations}</Text>
+          <Section style={{ marginBottom: "20px", padding: "15px", backgroundColor: "#f9fafb", borderRadius: "5px" }}>
+            <Heading as="h2" style={{ fontSize: "18px", marginBottom: "10px", color: "#4b5563" }}>
+              Recommendations
+            </Heading>
+            <Text style={{ margin: "5px 0", color: "#374151" }}>{data.recommendations}</Text>
           </Section>
 
-          <Hr style={hr} />
+          <Hr style={{ borderColor: "#e5e7eb", margin: "20px 0" }} />
 
-          <Section style={section}>
-            <Heading style={h2}>Attachments</Heading>
+          <Section style={{ display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
             {data.stampImage && (
-              <Section>
-                <Heading style={h3}>Institution Stamp</Heading>
-                <Img src={data.stampImage} alt="Institution Stamp" width="300" height="auto" style={image} />
-              </Section>
+              <div style={{ width: "48%" }}>
+                <Heading as="h3" style={{ fontSize: "16px", marginBottom: "10px", color: "#4b5563" }}>
+                  Institution Stamp
+                </Heading>
+                <Img
+                  src={data.stampImage}
+                  alt="Institution Stamp"
+                  width="100%"
+                  style={{ maxHeight: "150px", objectFit: "contain", border: "1px solid #e5e7eb" }}
+                />
+              </div>
             )}
 
             {data.signatureImage && (
-              <Section>
-                <Heading style={h3}>Client Signature</Heading>
-                <Img src={data.signatureImage} alt="Client Signature" width="300" height="auto" style={image} />
-              </Section>
+              <div style={{ width: "48%" }}>
+                <Heading as="h3" style={{ fontSize: "16px", marginBottom: "10px", color: "#4b5563" }}>
+                  Client Signature
+                </Heading>
+                <Img
+                  src={data.signatureImage}
+                  alt="Client Signature"
+                  width="100%"
+                  style={{ maxHeight: "150px", objectFit: "contain", border: "1px solid #e5e7eb" }}
+                />
+              </div>
             )}
           </Section>
 
-          <Hr style={hr} />
-
-          <Text style={footer}>
-            This job card was submitted on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
+          <Text style={{ textAlign: "center", fontSize: "12px", color: "#6b7280", marginTop: "20px" }}>
+            This job card was generated on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
           </Text>
         </Container>
       </Body>
     </Html>
   )
-}
-
-// Styles
-const main = {
-  backgroundColor: "#f6f9fc",
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif',
-}
-
-const container = {
-  backgroundColor: "#ffffff",
-  margin: "0 auto",
-  padding: "20px",
-  maxWidth: "600px",
-}
-
-const h1 = {
-  color: "#333",
-  fontSize: "24px",
-  fontWeight: "bold",
-  margin: "30px 0",
-  padding: "0",
-  textAlign: "center" as const,
-}
-
-const h2 = {
-  color: "#333",
-  fontSize: "20px",
-  fontWeight: "bold",
-  margin: "15px 0",
-  padding: "0",
-}
-
-const h3 = {
-  color: "#333",
-  fontSize: "16px",
-  fontWeight: "bold",
-  margin: "10px 0",
-  padding: "0",
-}
-
-const text = {
-  color: "#333",
-  fontSize: "14px",
-  lineHeight: "24px",
-  margin: "5px 0",
-}
-
-const section = {
-  margin: "15px 0",
-}
-
-const hr = {
-  borderColor: "#e6ebf1",
-  margin: "20px 0",
-}
-
-const image = {
-  border: "1px solid #e6ebf1",
-  borderRadius: "4px",
-  marginTop: "10px",
-}
-
-const footer = {
-  color: "#8898aa",
-  fontSize: "12px",
-  lineHeight: "22px",
-  marginTop: "20px",
-  textAlign: "center" as const,
 }

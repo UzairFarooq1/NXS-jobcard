@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { CheckCircle2, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import { CheckCircle2, ChevronLeft, ChevronRight, Loader2, WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import EngineerDetails from "./steps/engineer-details"
@@ -17,6 +17,8 @@ import Attachments from "./steps/attachments"
 import Confirmation from "./steps/confirmation"
 import { submitJobCard } from "@/lib/actions"
 import { useToast } from "@/hooks/use-toast"
+import { saveJobCardOffline, getUnsyncedJobCards, markJobCardAsSynced } from "@/lib/offline-db"
+import { useOnlineStatus } from "@/hooks/use-online-status"
 
 // Define the form schema
 const formSchema = z.object({
@@ -51,6 +53,9 @@ const formSchema = z.object({
   // Attachments
   stampImage: z.string().optional(),
   signatureImage: z.string().optional(),
+
+  // Offline sync flag
+  syncedFromOffline: z.boolean().optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -59,7 +64,11 @@ export default function JobCardForm() {
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isComplete, setIsComplete] = useState(false)
+  const [jobCardId, setJobCardId] = useState<string | null>(null)
+  const [hasPDF, setHasPDF] = useState(false)
   const { toast } = useToast()
+  const isOnline = useOnlineStatus()
+  const [offlineCount, setOfflineCount] = useState(0)
 
   const totalSteps = 7
 
@@ -84,8 +93,77 @@ export default function JobCardForm() {
       recommendations: "",
       stampImage: "",
       signatureImage: "",
+      syncedFromOffline: false,
     },
   })
+
+  // Check for unsynchronized job cards when coming online
+  useEffect(() => {
+    if (isOnline) {
+      syncOfflineData()
+    }
+  }, [isOnline])
+
+  // Count offline job cards
+  useEffect(() => {
+    async function countOfflineCards() {
+      try {
+        const unsyncedCards = await getUnsyncedJobCards()
+        setOfflineCount(unsyncedCards.length)
+      } catch (error) {
+        console.error("Error counting offline job cards:", error)
+      }
+    }
+
+    countOfflineCards()
+  }, [isComplete])
+
+  // Sync offline data when coming online
+  async function syncOfflineData() {
+    try {
+      const unsyncedCards = await getUnsyncedJobCards()
+
+      if (unsyncedCards.length > 0) {
+        toast({
+          title: `Syncing ${unsyncedCards.length} offline job card(s)`,
+          description: "Please wait while we upload your offline job cards.",
+        })
+
+        for (const card of unsyncedCards) {
+          try {
+            if (card.id) {
+              // Add the offline sync flag
+              const formData = { ...card.formData, syncedFromOffline: true }
+
+              // Submit to server
+              await submitJobCard(formData)
+
+              // Mark as synced
+              await markJobCardAsSynced(card.id)
+
+              toast({
+                title: "Job card synced successfully",
+                description: `Job card for ${formData.clientCompany} has been uploaded.`,
+              })
+            }
+          } catch (error) {
+            console.error("Error syncing job card:", error)
+            toast({
+              title: "Sync failed",
+              description: "Failed to sync an offline job card. It will be retried later.",
+              variant: "destructive",
+            })
+          }
+        }
+
+        // Update the count
+        const remainingCards = await getUnsyncedJobCards()
+        setOfflineCount(remainingCards.length)
+      }
+    } catch (error) {
+      console.error("Error syncing offline data:", error)
+    }
+  }
 
   const nextStep = async () => {
     const fields = getFieldsForStep(step)
@@ -129,13 +207,27 @@ export default function JobCardForm() {
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
+
     try {
-      await submitJobCard(data)
-      setIsComplete(true)
-      toast({
-        title: "Job card submitted successfully",
-        description: "The job card has been sent to the admin.",
-      })
+      if (isOnline) {
+        // Online submission
+        const result = await submitJobCard(data)
+        setJobCardId(result.jobCardId)
+        setHasPDF(result.pdfAvailable)
+        setIsComplete(true)
+        toast({
+          title: "Job card submitted successfully",
+          description: "The job card has been sent to the admin.",
+        })
+      } else {
+        // Offline submission
+        await saveJobCardOffline(data)
+        setIsComplete(true)
+        toast({
+          title: "Job card saved offline",
+          description: "The job card will be submitted when you're back online.",
+        })
+      }
     } catch (error) {
       console.error("Error submitting job card:", error)
       toast({
@@ -170,11 +262,29 @@ export default function JobCardForm() {
   }
 
   if (isComplete) {
-    return <Confirmation />
+    return <Confirmation jobCardId={jobCardId} hasPDF={hasPDF} isOnline={isOnline} offlineCount={offlineCount} />
   }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
+      {!isOnline && (
+        <div className="mb-4 p-2 bg-amber-50 border border-amber-200 rounded-md flex items-center text-amber-700">
+          <WifiOff className="h-4 w-4 mr-2" />
+          <span className="text-sm">
+            You're offline. Your job card will be saved locally and submitted when you're back online.
+          </span>
+        </div>
+      )}
+
+      {isOnline && offlineCount > 0 && (
+        <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded-md flex items-center text-blue-700">
+          <CheckCircle2 className="h-4 w-4 mr-2" />
+          <span className="text-sm">
+            You have {offlineCount} job card(s) saved offline. They will be submitted automatically.
+          </span>
+        </div>
+      )}
+
       <div className="mb-6">
         <div className="flex justify-between mb-2">
           {Array.from({ length: totalSteps }).map((_, index) => (
