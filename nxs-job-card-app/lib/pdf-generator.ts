@@ -8,8 +8,9 @@ export async function generatePDF(data: any) {
 
       // Collect the PDF data chunks
       const chunks: Buffer[] = []
-      doc.on("data", (chunk) => chunks.push(chunk))
+      doc.on("data", (chunk: Buffer<ArrayBufferLike>) => chunks.push(chunk))
       doc.on("end", () => resolve(Buffer.concat(chunks)))
+      doc.on("error", (err: any) => reject(err))
 
       // Add company logo or title
       doc.fontSize(25).text("Job Card Report", { align: "center" })
@@ -64,7 +65,7 @@ export async function generatePDF(data: any) {
       // Add resolution details
       addSection("Final Result", {
         Status: data.resolutionStatus,
-        Details: data.resolutionDetails,
+        Details: data.resolutionDetails || "N/A",
         "Parts Replaced": data.partsReplaced || "None",
       })
 
@@ -72,25 +73,6 @@ export async function generatePDF(data: any) {
       addSection("Recommendations", {
         Recommendations: data.recommendations,
       })
-
-      // Add images if available
-      doc.addPage()
-      doc.fontSize(14).text("Attachments", { underline: true })
-      doc.moveDown()
-
-      // We would need to fetch and embed the images here
-      // This is a simplified version without actual image embedding
-      if (data.stampImage) {
-        doc.fontSize(12).text("Institution Stamp")
-        doc.fontSize(10).text(`Image URL: ${data.stampImage}`)
-        doc.moveDown()
-      }
-
-      if (data.signatureImage) {
-        doc.fontSize(12).text("Client Signature")
-        doc.fontSize(10).text(`Image URL: ${data.signatureImage}`)
-        doc.moveDown()
-      }
 
       // Finalize the PDF
       doc.end()

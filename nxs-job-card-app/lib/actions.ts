@@ -3,7 +3,7 @@
 import { put } from "@vercel/blob"
 import nodemailer from "nodemailer"
 import { renderAsync } from "@react-email/render"
-import JobCardEmailTemplate from "@/components/email/job-card-template"
+import JobCardEmail from "@/components/email/job-card-email"
 import { createServerClient } from "./supabase"
 import { generatePDF } from "./pdf-generator"
 
@@ -103,10 +103,17 @@ export async function submitJobCard(data: any) {
     const adminEmail = "uzair.farooq@nxsltd.com"
 
     // Render the React email template to HTML
-    const emailHtml = await renderAsync(JobCardEmailTemplate({ data: formattedData }))
+    const emailHtml = await renderAsync(JobCardEmail({ data: formattedData }))
 
     // Generate PDF
-    const pdfBuffer = await generatePDF(formattedData)
+    let pdfBuffer
+    try {
+      pdfBuffer = await generatePDF(formattedData)
+    } catch (pdfError) {
+      console.error("Error generating PDF:", pdfError)
+      // Continue without PDF if generation fails
+      pdfBuffer = Buffer.from("PDF generation failed")
+    }
 
     // Send email with job card details
     const info = await transporter.sendMail({
@@ -114,13 +121,15 @@ export async function submitJobCard(data: any) {
       to: adminEmail,
       subject: `Job Card: ${data.clientCompany} - ${data.machineName}`,
       html: emailHtml,
-      attachments: [
-        {
-          filename: `jobcard-${Date.now()}.pdf`,
-          content: pdfBuffer,
-          contentType: "application/pdf",
-        },
-      ],
+      attachments: pdfBuffer
+        ? [
+            {
+              filename: `jobcard-${Date.now()}.pdf`,
+              content: pdfBuffer,
+              contentType: "application/pdf",
+            },
+          ]
+        : [],
     })
 
     // Update the job card to mark email as sent
