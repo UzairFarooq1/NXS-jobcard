@@ -11,13 +11,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { notFound } from "next/navigation";
+import { PDFDownloadButton } from "@/components/pdf-download-button";
 import {
   ReactElement,
   JSXElementConstructor,
   ReactNode,
   ReactPortal,
 } from "react";
-
 export default async function ServiceDetail({
   params,
 }: {
@@ -107,7 +107,10 @@ export default async function ServiceDetail({
             {service.client_name}
           </p>
         </div>
-        <div>{service.status && getStatusBadge(service.status)}</div>
+        <div className="flex items-center gap-2">
+          <PDFDownloadButton serviceId={service.id} />
+          {service.status && getStatusBadge(service.status)}
+        </div>
       </div>
 
       <div className="max-w-4xl mx-auto space-y-8">

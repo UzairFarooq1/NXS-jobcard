@@ -3,6 +3,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase"
 import { revalidatePath } from "next/cache"
 import type { ServiceFormData } from "@/lib/types"
+import { generateServiceReportPDF } from "@/lib/pdf-generator"
 
 export async function submitServiceReport(formData: ServiceFormData) {
   try {
@@ -169,6 +170,30 @@ export async function getServiceById(id: string) {
       success: false,
       message: error instanceof Error ? error.message : "An unknown error occurred",
       data: null,
+    }
+  }
+}
+
+export async function generatePDF(serviceId: string) {
+  try {
+    const { success, data: service } = await getServiceById(serviceId)
+
+    if (!success || !service) {
+      throw new Error("Service not found")
+    }
+
+    const pdfBuffer = generateServiceReportPDF(service)
+
+    return {
+      success: true,
+      data: pdfBuffer,
+      filename: `service-report-${serviceId}.pdf`,
+    }
+  } catch (error) {
+    console.error("Error generating PDF:", error)
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "An unknown error occurred",
     }
   }
 }
